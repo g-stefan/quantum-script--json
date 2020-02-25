@@ -1,0 +1,6 @@
+--lib qse-json
+--project-base=quantum-script-extension-json
+--source-is-separate
+--use-project=quantum-script.static
+--install-dev
+--install-inc=quantum-script-extension
