@@ -54,7 +54,9 @@ namespace Quantum {
 							};
 							if (token.isNumber()) {
 								Number valueNumber;
-								sscanf( token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber);
+								if(sscanf( token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber)!=1){
+									valueNumber = 0;
+								};
 								(result->operatorIndex(index++))=VariableNumber::newVariable(valueNumber);
 								continue;
 							};
@@ -116,7 +118,9 @@ namespace Quantum {
 									if (token.isNumber()) {
 										TPointer<Variable> keyV = VariableString::newVariable(key_);
 										Number valueNumber;
-										sscanf(token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber);
+										if(sscanf(token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber) != 1){
+											valueNumber = 0;
+										};
 										(result->operatorReferenceIndex(keyV))=VariableNumber::newVariable(valueNumber);
 										continue;
 									};
@@ -175,7 +179,9 @@ namespace Quantum {
 						};
 						if (token.isNumber()) {
 							Number valueNumber;
-							sscanf(token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber);
+							if(sscanf(token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber) != 1){
+								valueNumber = 0;
+							};
 							result = VariableNumber::newVariable(valueNumber);
 							return true;
 						};
