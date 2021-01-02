@@ -1,9 +1,11 @@
 # Quantum Script Extension JSON
 
-JSON;\
-JSON.decode(x);\
-JSON.encode(x);\
+```javascript
+JSON;
+JSON.decode(x);
+JSON.encode(x);
 JSON.encodeWithIndentation(x,step);
+```
 
 ## License
 
