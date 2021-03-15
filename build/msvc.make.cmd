@@ -19,5 +19,5 @@ exit 1
 :StepX
 
 call :cmdX file-to-cs --touch=source/quantum-script-extension-json.cpp --file-in=source/quantum-script-extension-json.js --file-out=source/quantum-script-extension-json.src --is-string --name=extensionJSONSource
-call :cmdX xyo-cc --mode=%ACTION% @util/quantum-script-extension-json.static.compile
-call :cmdX xyo-cc --mode=%ACTION% @util/quantum-script-extension-json.dynamic.compile
+call :cmdX xyo-cc --mode=%ACTION% @build/source/quantum-script-extension-json.static.compile
+call :cmdX xyo-cc --mode=%ACTION% @build/source/quantum-script-extension-json.dynamic.compile
