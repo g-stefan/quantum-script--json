@@ -49,7 +49,7 @@ namespace Quantum {
 								continue;
 							};
 							if (token.isString()) {
-								(result->operatorIndex(index++))=VariableString::newVariable(token.value);
+								result->setPropertyByIndex(index++,VariableString::newVariable(token.value));
 								continue;
 							};
 							if (token.isNumber()) {
@@ -57,25 +57,25 @@ namespace Quantum {
 								if(sscanf( token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber)!=1){
 									valueNumber = 0;
 								};
-								(result->operatorIndex(index++))=VariableNumber::newVariable(valueNumber);
+								result->setPropertyByIndex(index++,VariableNumber::newVariable(valueNumber));
 								continue;
 							};
 							if (token.isSymbolX("true")) {
-								(result->operatorIndex(index++))=VariableBoolean::newVariable(true);
+								result->setPropertyByIndex(index++,VariableBoolean::newVariable(true));
 								continue;
 							};
 							if (token.isSymbolX("false")) {
-								(result->operatorIndex(index++))=VariableBoolean::newVariable(false);
+								result->setPropertyByIndex(index++,VariableBoolean::newVariable(false));
 								continue;
 							};
 							if (token.isSymbolX("null")) {
-								(result->operatorIndex(index++))=VariableNull::newVariable();
+								result->setPropertyByIndex(index++,VariableNull::newVariable());
 								continue;
 							};
 							if(token.checkIs1("{")) {
 								TPointer<Variable> value_;
 								if(jsonParseObject(token, value_)) {
-									(result->operatorIndex(index++)) = value_;
+									result->setPropertyByIndex(index++, value_);
 									continue;
 								};
 								break;
@@ -83,7 +83,7 @@ namespace Quantum {
 							if(token.checkIs1("[")) {
 								TPointer<Variable> value_;
 								if(jsonParseArray(token, value_)) {
-									(result->operatorIndex(index++)) = value_;
+									result->setPropertyByIndex(index++, value_);
 									continue;
 								};
 								break;
@@ -112,7 +112,7 @@ namespace Quantum {
 									token.reset();
 									if (token.isString()) {
 										TPointer<Variable> keyV = VariableString::newVariable(key_);
-										(result->operatorReferenceIndex(keyV))=VariableString::newVariable(token.value);
+										result->setPropertyByVariable(keyV,VariableString::newVariable(token.value));
 										continue;
 									};
 									if (token.isNumber()) {
@@ -121,29 +121,29 @@ namespace Quantum {
 										if(sscanf(token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber) != 1){
 											valueNumber = 0;
 										};
-										(result->operatorReferenceIndex(keyV))=VariableNumber::newVariable(valueNumber);
+										result->setPropertyByVariable(keyV,VariableNumber::newVariable(valueNumber));
 										continue;
 									};
 									if (token.isSymbolX("true")) {
 										TPointer<Variable> keyV = VariableString::newVariable(key_);
-										(result->operatorReferenceIndex(keyV))=VariableBoolean::newVariable(true);
+										result->setPropertyByVariable(keyV,VariableBoolean::newVariable(true));
 										continue;
 									};
 									if (token.isSymbolX("false")) {
 										TPointer<Variable> keyV = VariableString::newVariable(key_);
-										(result->operatorReferenceIndex(keyV))=VariableBoolean::newVariable(false);
+										result->setPropertyByVariable(keyV,VariableBoolean::newVariable(false));
 										continue;
 									};
 									if (token.isSymbolX("null")) {
 										TPointer<Variable> keyV = VariableString::newVariable(key_);
-										(result->operatorReferenceIndex(keyV))=VariableNull::newVariable();
+										result->setPropertyByVariable(keyV,VariableNull::newVariable());
 										continue;
 									};
 									if(token.checkIs1("{")) {
 										TPointer<Variable> value_;
 										if(jsonParseObject(token, value_)) {
 											TPointer<Variable> keyV = VariableString::newVariable(key_);
-											(result->operatorReferenceIndex(keyV)) = value_;
+											result->setPropertyByVariable(keyV, value_);
 											continue;
 										};
 										break;
@@ -152,7 +152,7 @@ namespace Quantum {
 										TPointer<Variable> value_;
 										if(jsonParseArray(token, value_)) {
 											TPointer<Variable> keyV = VariableString::newVariable(key_);
-											(result->operatorReferenceIndex(keyV)) = value_;
+											result->setPropertyByVariable(keyV, value_);
 											continue;
 										};
 										break;
