@@ -6,9 +6,9 @@ rem Created by Grigore Stefan <g_stefan@yahoo.com>
 set ACTION=%1
 if "%1" == "" set ACTION=make
 
-echo -^> %ACTION% quantum-script-extension-json
+echo - %BUILD_PROJECT% ^> %1
 
-goto StepX
+goto cmdXDefined
 :cmdX
 %*
 if errorlevel 1 goto cmdXError
@@ -16,7 +16,7 @@ goto :eof
 :cmdXError
 echo "Error: %ACTION%"
 exit 1
-:StepX
+:cmdXDefined
 
 call :cmdX file-to-cs --touch=source/quantum-script-extension-json.cpp --file-in=source/quantum-script-extension-json.js --file-out=source/quantum-script-extension-json.src --is-string --name=extensionJSONSource
 call :cmdX xyo-cc --mode=%ACTION% @build/source/quantum-script-extension-json.static.compile
