@@ -12,6 +12,5 @@
 #include "quantum-script-extension-json-license.cpp"
 
 #ifndef QUANTUM_SCRIPT_EXTENSION_JSON_NO_VERSION
-#include "quantum-script-extension-json-version.cpp"
+#	include "quantum-script-extension-json-version.cpp"
 #endif
-

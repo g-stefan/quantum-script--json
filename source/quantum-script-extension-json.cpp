@@ -14,7 +14,7 @@
 #include "quantum-script-extension-json-license.hpp"
 #include "quantum-script-extension-json.hpp"
 #ifndef QUANTUM_SCRIPT_EXTENSION_JSON_NO_VERSION
-#include "quantum-script-extension-json-version.hpp"
+#	include "quantum-script-extension-json-version.hpp"
 #endif
 
 #include "quantum-script-variablenull.hpp"
@@ -49,40 +49,40 @@ namespace Quantum {
 								continue;
 							};
 							if (token.isString()) {
-								result->setPropertyByIndex(index++,VariableString::newVariable(token.value));
+								result->setPropertyByIndex(index++, VariableString::newVariable(token.value));
 								continue;
 							};
 							if (token.isNumber()) {
 								Number valueNumber;
-								if(sscanf( token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber)!=1){
+								if (sscanf(token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber) != 1) {
 									valueNumber = 0;
 								};
-								result->setPropertyByIndex(index++,VariableNumber::newVariable(valueNumber));
+								result->setPropertyByIndex(index++, VariableNumber::newVariable(valueNumber));
 								continue;
 							};
 							if (token.isSymbolX("true")) {
-								result->setPropertyByIndex(index++,VariableBoolean::newVariable(true));
+								result->setPropertyByIndex(index++, VariableBoolean::newVariable(true));
 								continue;
 							};
 							if (token.isSymbolX("false")) {
-								result->setPropertyByIndex(index++,VariableBoolean::newVariable(false));
+								result->setPropertyByIndex(index++, VariableBoolean::newVariable(false));
 								continue;
 							};
 							if (token.isSymbolX("null")) {
-								result->setPropertyByIndex(index++,VariableNull::newVariable());
+								result->setPropertyByIndex(index++, VariableNull::newVariable());
 								continue;
 							};
-							if(token.checkIs1("{")) {
+							if (token.checkIs1("{")) {
 								TPointer<Variable> value_;
-								if(jsonParseObject(token, value_)) {
+								if (jsonParseObject(token, value_)) {
 									result->setPropertyByIndex(index++, value_);
 									continue;
 								};
 								break;
 							};
-							if(token.checkIs1("[")) {
+							if (token.checkIs1("[")) {
 								TPointer<Variable> value_;
-								if(jsonParseArray(token, value_)) {
+								if (jsonParseArray(token, value_)) {
 									result->setPropertyByIndex(index++, value_);
 									continue;
 								};
@@ -93,7 +93,6 @@ namespace Quantum {
 					};
 					return false;
 				};
-
 
 				static bool jsonParseObject(Token &token, TPointer<Variable> &result) {
 					if (token.is1("{")) {
@@ -112,45 +111,45 @@ namespace Quantum {
 									token.reset();
 									if (token.isString()) {
 										TPointer<Variable> keyV = VariableString::newVariable(key_);
-										result->setPropertyByVariable(keyV,VariableString::newVariable(token.value));
+										result->setPropertyByVariable(keyV, VariableString::newVariable(token.value));
 										continue;
 									};
 									if (token.isNumber()) {
 										TPointer<Variable> keyV = VariableString::newVariable(key_);
 										Number valueNumber;
-										if(sscanf(token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber) != 1){
+										if (sscanf(token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber) != 1) {
 											valueNumber = 0;
 										};
-										result->setPropertyByVariable(keyV,VariableNumber::newVariable(valueNumber));
+										result->setPropertyByVariable(keyV, VariableNumber::newVariable(valueNumber));
 										continue;
 									};
 									if (token.isSymbolX("true")) {
 										TPointer<Variable> keyV = VariableString::newVariable(key_);
-										result->setPropertyByVariable(keyV,VariableBoolean::newVariable(true));
+										result->setPropertyByVariable(keyV, VariableBoolean::newVariable(true));
 										continue;
 									};
 									if (token.isSymbolX("false")) {
 										TPointer<Variable> keyV = VariableString::newVariable(key_);
-										result->setPropertyByVariable(keyV,VariableBoolean::newVariable(false));
+										result->setPropertyByVariable(keyV, VariableBoolean::newVariable(false));
 										continue;
 									};
 									if (token.isSymbolX("null")) {
 										TPointer<Variable> keyV = VariableString::newVariable(key_);
-										result->setPropertyByVariable(keyV,VariableNull::newVariable());
+										result->setPropertyByVariable(keyV, VariableNull::newVariable());
 										continue;
 									};
-									if(token.checkIs1("{")) {
+									if (token.checkIs1("{")) {
 										TPointer<Variable> value_;
-										if(jsonParseObject(token, value_)) {
+										if (jsonParseObject(token, value_)) {
 											TPointer<Variable> keyV = VariableString::newVariable(key_);
 											result->setPropertyByVariable(keyV, value_);
 											continue;
 										};
 										break;
 									};
-									if(token.checkIs1("[")) {
+									if (token.checkIs1("[")) {
 										TPointer<Variable> value_;
-										if(jsonParseArray(token, value_)) {
+										if (jsonParseArray(token, value_)) {
 											TPointer<Variable> keyV = VariableString::newVariable(key_);
 											result->setPropertyByVariable(keyV, value_);
 											continue;
@@ -167,10 +166,10 @@ namespace Quantum {
 
 				static bool jsonDecodeX(Token &token, TPointer<Variable> &result) {
 					if (token.read()) {
-						if(token.checkIs1("{")) {
+						if (token.checkIs1("{")) {
 							return jsonParseObject(token, result);
 						};
-						if(token.checkIs1("[")) {
+						if (token.checkIs1("[")) {
 							return jsonParseArray(token, result);
 						};
 						if (token.isString()) {
@@ -179,7 +178,7 @@ namespace Quantum {
 						};
 						if (token.isNumber()) {
 							Number valueNumber;
-							if(sscanf(token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber) != 1){
+							if (sscanf(token.value, QUANTUM_SCRIPT_FORMAT_NUMBER_INPUT, &valueNumber) != 1) {
 								valueNumber = 0;
 							};
 							result = VariableNumber::newVariable(valueNumber);
@@ -212,7 +211,7 @@ namespace Quantum {
 						if (input.init(&in)) {
 							token.input = &input;
 							token.sourceLineNumber = &sourceLineNumber;
-							if(!jsonDecodeX(token, retV)) {
+							if (!jsonDecodeX(token, retV)) {
 								in.close();
 								return Context::getValueUndefined();
 							};
@@ -221,7 +220,6 @@ namespace Quantum {
 					};
 					return retV;
 				};
-
 
 				static TPointer<Variable> jsonDecode(VariableFunction *function, Variable *this_, VariableArray *arguments) {
 #ifdef QUANTUM_SCRIPT_DEBUG_RUNTIME
@@ -246,12 +244,10 @@ namespace Quantum {
 #endif
 					executive->setExtensionPublic(extensionId, true);
 
-
 					executive->compileStringX("var JSON={};");
 					executive->setFunction2("JSON.decode(x)", jsonDecode);
 					executive->compileStringX(extensionJSONSource);
 				};
-
 
 			};
 		};
@@ -263,4 +259,3 @@ extern "C" QUANTUM_SCRIPT_EXTENSION_JSON_EXPORT void quantumScriptExtension(Quan
 	Quantum::Script::Extension::JSON::initExecutive(executive, extensionId);
 };
 #endif
-
