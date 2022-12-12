@@ -75,7 +75,7 @@ namespace XYO::QuantumScript::Extension::JSON {
 
 	static bool jsonParseObject(Token &token, TPointer<Variable> &result) {
 		if (token.is1("{")) {
-			result = VariableAssociativeArray::newVariable();
+			result = VariableObject::newVariable();
 			while (!token.isEof()) {
 				token.reset();
 				if (token.is1("}")) {
