@@ -201,7 +201,7 @@ namespace XYO::QuantumScript::Extension::JSON {
 	};
 
 	static TPointer<Variable> jsonDecode(VariableFunction *function, Variable *this_, VariableArray *arguments) {
-#ifdef QUANTUM_SCRIPT_DEBUG_RUNTIME
+#ifdef XYO_QUANTUMSCRIPT_DEBUG_RUNTIME
 		printf("- json-decode\n");
 #endif
 		return jsonDecode_((arguments->index(0))->toString());
