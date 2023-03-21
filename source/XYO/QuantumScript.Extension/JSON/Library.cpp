@@ -214,7 +214,7 @@ namespace XYO::QuantumScript::Extension::JSON {
 	void initExecutive(Executive *executive, void *extensionId) {
 
 		String info = "JSON\r\n";
-		info << License::shortLicense();
+		info << License::shortLicense().c_str();
 
 		executive->setExtensionName(extensionId, "JSON");
 		executive->setExtensionInfo(extensionId, info);
