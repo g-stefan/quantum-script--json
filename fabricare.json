@@ -22,7 +22,6 @@
 					"quantum-script--json"
 				]
 			}
-		],
-		"hasGithub" : true
+		]
 	}
 }
