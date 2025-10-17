@@ -14,6 +14,22 @@
 				]
 			},
 			{
+				"name": "quantum-script--json.static",
+				"make": "lib",
+				"category": "make",
+				"SPDX-License-Identifier": "MIT",
+				"sourcePath" : "XYO/QuantumScript.Extension/JSON",
+				"dependency" : [
+					"quantum-script.static",
+					"quantum-script--console.static",
+				],
+				"dependencyDefines" : [
+					"XYO_QUANTUMSCRIPT_EXTENSION_JSON_LIBRARY"
+				],
+				"linkVersion": "quantum-script--json",
+				"crt": "static"
+			},
+			{
 				"name" : "test.01",
 				"make" : "exe",
 				"category" : "test",
