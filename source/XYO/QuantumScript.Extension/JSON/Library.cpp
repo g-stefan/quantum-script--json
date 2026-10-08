@@ -13,61 +13,115 @@
 
 namespace XYO::QuantumScript::Extension::JSON {
 
-	static bool jsonParseObject(Token &token, TPointer<Variable> &result);
+	static bool jsonParseValue(Token &token, TPointer<Variable> &result);
+
+	static bool jsonIsDigit(char ch) {
+		return (ch >= '0') && (ch <= '9');
+	};
+
+	static bool jsonIsHexDigit(char ch) {
+		return jsonIsDigit(ch) || ((ch >= 'A') && (ch <= 'F')) || ((ch >= 'a') && (ch <= 'f'));
+	};
+
+	static bool jsonIsSymbolChar(char ch) {
+		return (ch == '_') || ((ch >= 'A') && (ch <= 'Z')) || ((ch >= 'a') && (ch <= 'z')) || jsonIsDigit(ch);
+	};
+
+	// [-] digits [. digits] [(e|E) [+|-] digits], or [-] 0x hexdigits
+	static bool jsonParseNumber(Token &token, TPointer<Variable> &result) {
+		String value;
+		Number valueNumber;
+
+		if (token.input->inputChar == '-') {
+			value << '-';
+			token.input->read();
+		};
+		if (!jsonIsDigit(token.input->inputChar)) {
+			return false;
+		};
+		if (token.input->inputChar == '0') {
+			value << '0';
+			token.input->read();
+			if ((token.input->inputChar == 'x') || (token.input->inputChar == 'X')) {
+				value << 'x';
+				token.input->read();
+				if (!jsonIsHexDigit(token.input->inputChar)) {
+					return false;
+				};
+				while (jsonIsHexDigit(token.input->inputChar)) {
+					value << token.input->inputChar;
+					token.input->read();
+				};
+			};
+		};
+		while (jsonIsDigit(token.input->inputChar)) {
+			value << token.input->inputChar;
+			token.input->read();
+		};
+		if (token.input->inputChar == '.') {
+			value << '.';
+			token.input->read();
+			while (jsonIsDigit(token.input->inputChar)) {
+				value << token.input->inputChar;
+				token.input->read();
+			};
+		};
+		if ((token.input->inputChar == 'e') || (token.input->inputChar == 'E')) {
+			value << 'e';
+			token.input->read();
+			if ((token.input->inputChar == '+') || (token.input->inputChar == '-')) {
+				value << token.input->inputChar;
+				token.input->read();
+			};
+			if (!jsonIsDigit(token.input->inputChar)) {
+				return false;
+			};
+			while (jsonIsDigit(token.input->inputChar)) {
+				value << token.input->inputChar;
+				token.input->read();
+			};
+		};
+		token.ignoreSpaceOrComment();
+
+		if (sscanf(value, XYO_QUANTUMSCRIPT_FORMAT_NUMBER_INPUT, &valueNumber) != 1) {
+			return false;
+		};
+		result = VariableNumber::newVariable(valueNumber);
+		return true;
+	};
+
+	// true / false / null, also as the last characters of the input
+	static bool jsonIsKeyword(Token &token, const char *name) {
+		int k;
+		for (k = 0; name[k] != 0; ++k) {
+			if (token.input->inputChar != name[k]) {
+				return false;
+			};
+			token.input->read();
+		};
+		if (jsonIsSymbolChar(token.input->inputChar)) {
+			return false;
+		};
+		token.ignoreSpaceOrComment();
+		return true;
+	};
 
 	static bool jsonParseArray(Token &token, TPointer<Variable> &result) {
 		if (token.is1("[")) {
 			uint32_t index = 0;
 			result = VariableArray::newVariable();
 			while (!token.isEof()) {
-				token.reset();
 				if (token.is1("]")) {
 					return true;
 				};
 				if (token.is1(",")) {
 					continue;
 				};
-				if (token.isString()) {
-					result->setPropertyByIndex(index++, VariableString::newVariable(token.value));
-					continue;
-				};
-				if (token.isNumber()) {
-					Number valueNumber;
-					if (sscanf(token.value, XYO_QUANTUMSCRIPT_FORMAT_NUMBER_INPUT, &valueNumber) != 1) {
-						valueNumber = 0;
-					};
-					result->setPropertyByIndex(index++, VariableNumber::newVariable(valueNumber));
-					continue;
-				};
-				if (token.isSymbolX("true")) {
-					result->setPropertyByIndex(index++, VariableBoolean::newVariable(true));
-					continue;
-				};
-				if (token.isSymbolX("false")) {
-					result->setPropertyByIndex(index++, VariableBoolean::newVariable(false));
-					continue;
-				};
-				if (token.isSymbolX("null")) {
-					result->setPropertyByIndex(index++, VariableNull::newVariable());
-					continue;
-				};
-				if (token.checkIs1("{")) {
-					TPointer<Variable> value_;
-					if (jsonParseObject(token, value_)) {
-						result->setPropertyByIndex(index++, value_);
-						continue;
-					};
+				TPointer<Variable> value_;
+				if (!jsonParseValue(token, value_)) {
 					break;
 				};
-				if (token.checkIs1("[")) {
-					TPointer<Variable> value_;
-					if (jsonParseArray(token, value_)) {
-						result->setPropertyByIndex(index++, value_);
-						continue;
-					};
-					break;
-				};
-				break;
+				result->setPropertyByIndex(index++, value_);
 			};
 		};
 		return false;
@@ -77,104 +131,81 @@ namespace XYO::QuantumScript::Extension::JSON {
 		if (token.is1("{")) {
 			result = VariableObject::newVariable();
 			while (!token.isEof()) {
-				token.reset();
 				if (token.is1("}")) {
 					return true;
 				};
 				if (token.is1(",")) {
 					continue;
 				};
-				if (token.isString()) {
-					String key_ = token.value;
-					if (token.is1(":")) {
-						token.reset();
-						if (token.isString()) {
-							TPointer<Variable> keyV = VariableString::newVariable(key_);
-							result->setPropertyByVariable(keyV, VariableString::newVariable(token.value));
-							continue;
-						};
-						if (token.isNumber()) {
-							TPointer<Variable> keyV = VariableString::newVariable(key_);
-							Number valueNumber;
-							if (sscanf(token.value, XYO_QUANTUMSCRIPT_FORMAT_NUMBER_INPUT, &valueNumber) != 1) {
-								valueNumber = 0;
-							};
-							result->setPropertyByVariable(keyV, VariableNumber::newVariable(valueNumber));
-							continue;
-						};
-						if (token.isSymbolX("true")) {
-							TPointer<Variable> keyV = VariableString::newVariable(key_);
-							result->setPropertyByVariable(keyV, VariableBoolean::newVariable(true));
-							continue;
-						};
-						if (token.isSymbolX("false")) {
-							TPointer<Variable> keyV = VariableString::newVariable(key_);
-							result->setPropertyByVariable(keyV, VariableBoolean::newVariable(false));
-							continue;
-						};
-						if (token.isSymbolX("null")) {
-							TPointer<Variable> keyV = VariableString::newVariable(key_);
-							result->setPropertyByVariable(keyV, VariableNull::newVariable());
-							continue;
-						};
-						if (token.checkIs1("{")) {
-							TPointer<Variable> value_;
-							if (jsonParseObject(token, value_)) {
-								TPointer<Variable> keyV = VariableString::newVariable(key_);
-								result->setPropertyByVariable(keyV, value_);
-								continue;
-							};
-							break;
-						};
-						if (token.checkIs1("[")) {
-							TPointer<Variable> value_;
-							if (jsonParseArray(token, value_)) {
-								TPointer<Variable> keyV = VariableString::newVariable(key_);
-								result->setPropertyByVariable(keyV, value_);
-								continue;
-							};
-							break;
-						};
-					};
+				if ((token.input->inputChar != '"') && (token.input->inputChar != '\'')) {
+					break;
 				};
-				break;
+				token.reset();
+				if (!token.isString()) {
+					break;
+				};
+				String key_ = token.value;
+				if (!token.is1(":")) {
+					break;
+				};
+				TPointer<Variable> value_;
+				if (!jsonParseValue(token, value_)) {
+					break;
+				};
+				TPointer<Variable> keyV = VariableString::newVariable(key_);
+				result->setPropertyByVariable(keyV, value_);
 			};
+		};
+		return false;
+	};
+
+	// the first character selects the value type, a value that does not parse is an error
+	static bool jsonParseValue(Token &token, TPointer<Variable> &result) {
+		char ch = token.input->inputChar;
+		if (ch == '{') {
+			return jsonParseObject(token, result);
+		};
+		if (ch == '[') {
+			return jsonParseArray(token, result);
+		};
+		if ((ch == '"') || (ch == '\'')) {
+			token.reset();
+			if (token.isString()) {
+				result = VariableString::newVariable(token.value);
+				return true;
+			};
+			return false;
+		};
+		if ((ch == '-') || jsonIsDigit(ch)) {
+			return jsonParseNumber(token, result);
+		};
+		if (ch == 't') {
+			if (jsonIsKeyword(token, "true")) {
+				result = VariableBoolean::newVariable(true);
+				return true;
+			};
+			return false;
+		};
+		if (ch == 'f') {
+			if (jsonIsKeyword(token, "false")) {
+				result = VariableBoolean::newVariable(false);
+				return true;
+			};
+			return false;
+		};
+		if (ch == 'n') {
+			if (jsonIsKeyword(token, "null")) {
+				result = VariableNull::newVariable();
+				return true;
+			};
+			return false;
 		};
 		return false;
 	};
 
 	static bool jsonDecodeX(Token &token, TPointer<Variable> &result) {
 		if (token.read()) {
-			if (token.checkIs1("{")) {
-				return jsonParseObject(token, result);
-			};
-			if (token.checkIs1("[")) {
-				return jsonParseArray(token, result);
-			};
-			if (token.isString()) {
-				result = VariableString::newVariable(token.value);
-				return true;
-			};
-			if (token.isNumber()) {
-				Number valueNumber;
-				if (sscanf(token.value, XYO_QUANTUMSCRIPT_FORMAT_NUMBER_INPUT, &valueNumber) != 1) {
-					valueNumber = 0;
-				};
-				result = VariableNumber::newVariable(valueNumber);
-				return true;
-			};
-			if (token.isSymbolX("true")) {
-				result = VariableBoolean::newVariable(true);
-				return true;
-			};
-			if (token.isSymbolX("false")) {
-				result = VariableBoolean::newVariable(false);
-				return true;
-			};
-			if (token.isSymbolX("null")) {
-				result = VariableNull::newVariable();
-				return true;
-			};
+			return jsonParseValue(token, result);
 		};
 		return false;
 	};

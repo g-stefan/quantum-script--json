@@ -1,5 +1,6 @@
 {
 	"solution": {
+		"namespace" : "xyo",
 		"name" : "quantum-script--json",
 		"type" : "xyo-cpp",
 		"projects": [
@@ -21,7 +22,7 @@
 				"sourcePath" : "XYO/QuantumScript.Extension/JSON",
 				"dependency" : [
 					"quantum-script.static",
-					"quantum-script--console.static",
+					"quantum-script--console.static"
 				],
 				"dependencyDefines" : [
 					"XYO_QUANTUMSCRIPT_EXTENSION_JSON_LIBRARY"
